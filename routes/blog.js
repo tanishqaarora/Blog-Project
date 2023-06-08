@@ -1,57 +1,78 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../models/index.js');
-const blog = require('../models/blog');
+
 
 // Creating new Blog 
 router.post('/create-blog', async(req, res) => {
-    const blogData = req.body;
-    const newBlog = await db.blog.create(blogData);
-
-    // console.log(newBlog);
-    res.status(200).send("Blog created");
+    try {
+        const blogData = req.body;
+        const newBlog = await db.blog.create(blogData);
+        // console.log(newBlog);
+        res.status(200).send("Blog created");
+    } catch (error) {
+        res.status(500).json(error.message);
+    }
 })
 
 // Getting all blogs
 router.get('/get-all-blogs', async(req, res) => {
-    const blogs = await db.blog.findAll({
-        order: ['createdAt']
-    })
-
-    // console.log(blogs);
-    res.status(200).send(blogs);
+    try {
+        const blogs = await db.blog.findAll({
+            order: ['createdAt'],
+            include: [{
+                model: db.comment
+            }]
+        })
+        console.log(blogs);
+        res.status(200).send(blogs);
+    } catch (error) {
+        res.status(500).json(error.message);
+    }
 })
 
 // Getting a single blog
 router.get('/blog/:id', async(req, res) => {
-    const getBlog = await db.blog.findOne({
-        where: {id: req.params.id}
-    });
+    try {
+        const getBlog = await db.blog.findOne({
+            where: {id: req.params.id}
+        });
 
-    // console.log(getBlog);
-    res.status(200).send(getBlog);
+        // console.log(getBlog);
+        res.status(200).send(getBlog);
+    } catch (error) {
+        res.status(500).json(error.message);
+    }
 })
 
 // Updating a blog
 router.put('/blog/:id', async(req, res) => {
-    const getBlogToBeUpdated = await db.blog.findOne({
-        where: {id: req.params.id}
-    });
-    const updatedData = req.body;
-    const updatedBlog = await getBlogToBeUpdated.update({ updatedData });
+    try {
+        const getBlogToBeUpdated = await db.blog.findOne({
+            where: {id: req.params.id}
+        });
+        const updatedData = req.body;
+        const updatedBlog = await getBlogToBeUpdated.update({ updatedData });
 
-    // console.log(updatedBlog);
-    res.status(200).send(updatedBlog);
+        // console.log(updatedBlog);
+        res.status(200).send(updatedBlog);
+    } catch (error) {
+        res.status(500).json(error.message);
+    }
 })
 
 // Deleting a blog
 router.delete('/blog/:id', async(req, res) => {
-    const removeBlog = await db.blog.destroy({
-        where: { id:req.params.id }
-    });
-    
-    // console.log("deleted");
-    res.send("Blog deleted");
+    try {
+        const removeBlog = await db.blog.destroy({
+            where: { id:req.params.id }
+        });
+        
+        // console.log("deleted");
+        res.send("Blog deleted");
+    } catch (error) {
+        res.status(500).json(error.message);
+    }
     
 })
 
