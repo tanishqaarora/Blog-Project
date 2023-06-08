@@ -15,8 +15,14 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Comment.init({
-    content: DataTypes.STRING,
-    userId: DataTypes.INTEGER,
+    content: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
     // Set FK relationship (hasMany) with 'Blog'
     blogId: {
       type: DataTypes.INTEGER,

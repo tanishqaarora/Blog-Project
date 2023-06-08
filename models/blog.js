@@ -17,8 +17,17 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Blog.init({
-    title: DataTypes.STRING,
-    description: DataTypes.STRING,
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        len: [0, 20],
+      }
+    },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: false
+    }
     }, {
       sequelize,
       modelName: 'blog',
