@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
     // Set FK relationship (hasMany) with 'Blog'
     blogId: {
       type: DataTypes.INTEGER,
+      allowNull: false
     }
   }, {
     sequelize,

@@ -8,12 +8,12 @@ router.post('/add-comment', async(req, res) => {
         if(!req.body.content) {
             return res.send("Please add some content");
         } else {
-            const commentData = req.body;
-            const newComment = await db.comment.create(commentData);
+            const { content } = req.body;
+            const newComment = await db.comment.create({ content });
             return res.status(200).send("Comment Added");
         }
     } catch (error) {
-         res.status(500).send({
+         res.status(500).json({
             msg: error.message
         });
     }
@@ -25,7 +25,9 @@ router.get('/get-all-comments', async(req, res) => {
         const comments = await db.comment.findAll({});
         res.status(200).send(comments);
     } catch (error) {
-        res.status(500).json(error.message);
+        res.status(500).json( {
+            msg: error.message
+        });
     }
 })
 
@@ -35,9 +37,15 @@ router.get('/comment/:id', async(req, res) => {
         const getComment = await db.comment.findOne({
             where: { id: req.params.id }
         });
-        res.status(200).send(getComment);
+
+        if(!getComment) {
+            return res.status(404).send("Comment does not exist")
+        }
+        return res.status(200).send(getComment);
     } catch (error) {
-        res.status(500).json(error.message);
+        res.status(500).json({
+            msg: error.message
+        });
     }
 })
 
@@ -52,13 +60,16 @@ router.put('/comment/:id', async(req, res) => {
         if(!commentToBeUpdated) {
             return res.status(404).send("Comment not exist");
         } else {
-            const updatedComment = await commentToBeUpdated.update({ content: "amazing stuff" });
+            const { content } = req.body;
+            const updatedComment = await commentToBeUpdated.update({ content });
 
             return res.status(200).send("Successfully updated");
             console.log(updatedComment);
         } 
     } catch (error) {
-        res.status(500).json(error.message);
+        res.status(500).json({
+            msg: error.message 
+        });
     }
 })
 
@@ -75,12 +86,14 @@ router.delete('/comment/:id', async(req, res) => {
             return res.status(404).send(`Comment with ${req.params.id} does not exist`);
         } else {
             const removeComment = await db.comment.destroy({
-                where: { id:req.params.id }
+                where: { id: req.params.id }
             });
             return res.send(`Comment with id ${req.params.id} is deleted`);
         }
     } catch (error) {
-        res.status(500).json(error.message);
+        res.status(500).json({
+            msg: error.message
+        });
     }
     
 })

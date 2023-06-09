@@ -9,13 +9,15 @@ router.post('/create-blog', async(req, res) => {
         if(!req.body || !req.body.title || !req.body.description) {
             return res.status(400).send("Please fill all the fields");
         } else {
-            const blogData = req.body;
-            if(req.body.title.length > 20) {
+            const { title, description } = req.body;
+            console.log(title, description);
+            if(title.length > 20) {
                 return res.send("Title exceeds the limit");
+            } else {
+                const newBlog = await db.blog.create({ title, description });
+                // console.log(newBlog);
+                return res.status(200).send("Blog created"); 
             }
-            const newBlog = await db.blog.create(blogData);
-            console.log(newBlog);
-            return res.status(200).send("Blog created");   
         }
     } catch (error) {
         res.status(500).json({
@@ -35,7 +37,9 @@ router.get('/get-all-blogs', async(req, res) => {
         })
         res.status(200).send(blogs);
     } catch (error) {
-        res.status(500).json(error.message);
+        res.status(500).json({
+            msg: error.message
+        });
     }
 })
 
@@ -55,7 +59,9 @@ router.get('/blog/:id', async(req, res) => {
             return res.status(200).send(getBlog);
         }
     } catch (error) {
-        res.status(404).json(error.message);
+        res.status(404).json({
+            msg: error.message
+        });
     }
 })
 
@@ -70,12 +76,16 @@ router.put('/blog/:id', async(req, res) => {
         if(!getBlogToBeUpdated) {
             return res.status(404).send("This blog does not exist");
         } else {
-            const updatedBlog = await getBlogToBeUpdated.update( { description: "Some edited content"});
+            const { title, description } = req.body;
+            console.log(title, `=========${description}`);
+            const updatedBlog = await getBlogToBeUpdated.update( { title, description });
             // console.log(updatedBlog);
             res.status(200).send("Blog updated successfully");
         }
     } catch (error) {
-        res.status(500).json(error.message);
+        res.status(500).json({
+            msg: error.message
+        });
     }
 })
 
@@ -91,12 +101,15 @@ router.delete('/blog/:id', async(req, res) => {
             return res.status(404).send(`Blog with ${req.params.id} does not exist`);
         } else {
             const removeBlog = await db.blog.destroy({
-                where: { id:req.params.id }
+                where: { id: req.params.id }
             });
             return res.send(`Blog with id ${req.params.id} is deleted`);
         }
     } catch (error) {
-        res.status(500).json(error.message);
+        res.status(500).json({
+            msg: error.message
+        }
+        );
     }
 })
 
