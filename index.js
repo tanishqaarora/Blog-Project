@@ -7,6 +7,7 @@ const app = express();
 const blogRoutes = require('./routes/blog');
 const commentRoutes = require('./routes/comment');
 const userRoutes = require('./routes/user');
+const dashboardRoute = require('./utils/dashboard');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -15,5 +16,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/api', blogRoutes);
 app.use('/', commentRoutes);
 app.use('/', userRoutes);
+app.use('/', dashboardRoute);
 
 app.listen(port, () => console.log("Server is running..."));
