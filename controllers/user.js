@@ -9,7 +9,6 @@ exports.createUser = async(req, res) => {
         // Get user input
         const { name, email, username, password } = req.body;
         // Validate user input
-        // console.log(name, "=========", email, "========", username, "=======", password);
         if (!name || !email || !username || !password) {
             return res.status(400).json({
                 msg: "Please fill all the fields"
@@ -19,7 +18,7 @@ exports.createUser = async(req, res) => {
         // Validate email 
         if(email) {
             const validatedEmail = isEmailValid(email);
-            // console.log("++++++++", validatedEmail);
+            console.log("++++++++", validatedEmail);
             if(!validatedEmail) {
                 return res.json({
                     msg: "Invalid Email"
@@ -28,7 +27,7 @@ exports.createUser = async(req, res) => {
         }
 
         // Check password length 
-        if(password.length > 8) {
+        if(password && password.length > 8) {
             return res.json({
                 msg: "Password cannot exceeds 8 characters"
             })
@@ -38,7 +37,7 @@ exports.createUser = async(req, res) => {
         const oldUser = await db.user.findOne({
             where: {
                 [Op.or]: [
-                    { email },
+                    { email: email.toLowerCase() },
                     { username }
                 ]
             }
@@ -54,11 +53,10 @@ exports.createUser = async(req, res) => {
         // Hash Password using bcrypt
         const salt = await bcrypt.genSalt(10);
         const hashPassword = await bcrypt.hash(password, salt);
-        console.log("==========", hashPassword);
 
         // Create User
-        const newUser = await db.user.create({ name, email , username, password: hashPassword });
-        console.log(newUser);
+        const newUser = await db.user.create({ name, email: email.toLowerCase() , username, password: hashPassword });
+        // console.log(newUser);
         return res.status(200).json({
             msg: "user created",
             user: newUser
@@ -74,7 +72,7 @@ exports.createUser = async(req, res) => {
 exports.loginUser = async(req, res) => {
     try {
         // Get user input
-        let { email, password } = req.body;
+        const { email, password } = req.body;
 
         // Validate user input
         if ( !email || !password ) {
@@ -97,7 +95,7 @@ exports.loginUser = async(req, res) => {
         // Checking if user email exists
         const user = await db.user.findOne({ 
             where: {
-                email: req.body.email
+                email: req.body.email.toLowerCase()
             }
         });
 
@@ -121,14 +119,116 @@ exports.loginUser = async(req, res) => {
     }
 }
 
-exports.getUser = async(req, res) => {
-
+exports.gettingUsers = async(req, res) => {
+    try {
+        const users = await db.user.findAll({
+            order: ['createdAt']
+        })
+        return res.status(200).json({ users });
+    } catch (error) {
+        res.status(500).json({
+            msg: error.message
+        });
+    }
 }
+
+exports.getUser = async(req, res) => {
+    try {
+        const getUser = await db.user.findOne({
+            where: {id: req.params.id}
+        });
+        // If user is not found show error else show the user
+        if(!getUser) {
+            return res.status(404).json(`User with id ${req.params.id} not found`);
+        } else {
+            return res.status(200).json({
+                user: getUser
+            });
+        }
+    } catch (error) {
+        res.status(404).json({
+            msg: error.message
+        });
+    }
+}
+
+exports.updateUser = async(req, res) => {
+    try {
+        // Get user from db
+        const getUserToBeUpdated = await db.user.findOne({
+            where: {id: req.params.id}
+        });
+        // if user not found then show error else update the User
+        if(!getUserToBeUpdated) {
+            return res.status(404).json({
+                msg: "This user does not exist."
+            });
+        } else {
+            const { name, email, username, password } = req.body;
+            console.log("name--", name, "email--", email, "username--", username, "password--", password);
+
+            // Validate email 
+            if(email) {
+                const validatedEmail = isEmailValid(email);
+                console.log("++++++++", validatedEmail);
+                if(!validatedEmail) {
+                    return res.json({
+                        msg: "Invalid Email"
+                    })
+                }
+            }
+
+            // Check password length 
+            if(password && password.length > 8) {
+                return res.json({
+                    msg: "Password cannot exceeds 8 characters"
+                })
+            }
+            const updatedUser = await getUserToBeUpdated.update({ name, email, username, password });
+            console.log(updatedUser);
+            return res.status(200).json({
+                msg: "User updated successfully",
+                user: updatedUser
+            });
+        }
+    } catch (error) {
+        res.status(500).json({
+            msg: error.message
+        });
+    }
+}
+
+exports.deleteUser = async(req, res) => {
+    try {
+        // find the User
+        const getUserToBeDeleted = await db.user.findOne({
+            where: {id: req.params.id}
+        });
+        // If user is not found then show error else delete the user
+        if(!getUserToBeDeleted) {
+            return res.status(404).json({
+                msg: `User with id ${req.params.id} does not exist`
+            });
+        } else {
+            const removeUser = await db.user.destroy({
+                where: { id: req.params.id }
+            });
+            return res.json({
+                msg: `User with id ${req.params.id} is deleted.`
+        })
+        }
+    } catch (error) {
+        res.status(500).json({
+            msg: error.message
+        }
+        );
+    }
+}
+
 // Email Validation
 function isEmailValid(email) {
     let validRegex = /[^\s@]+@[^\s@]+\.[^\s@]+/gi
-    // console.log("EMAIL", email);
-    if(email.match(validRegex)) {
+    if(email.toLowerCase().match(validRegex)) {
         return true;
     } else {
         return false;
