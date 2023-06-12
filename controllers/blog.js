@@ -2,17 +2,22 @@ const db = require('../models/index.js');
 
 exports.createBlog = async(req, res) => {
     try {
-        if(!req.body || !req.body.title || !req.body.description) {
-            return res.status(400).send("Please fill all the fields");
+        const { title, description} = req.body;
+        if(!title || !description) {
+            return res.status(400).json({
+                msg: "Please fill all the fields"
+            });
         } else {
-            const { title, description } = req.body;
-            console.log(title, description);
             if(title.length > 20) {
-                return res.send("Title exceeds the limit");
+                return res.json({
+                    msg: "Title exceeds the limit"
+                });
             } else {
                 const newBlog = await db.blog.create({ title, description });
                 // console.log(newBlog);
-                return res.status(200).send("Blog created"); 
+                return res.status(200).json({
+                    msg: "Blog created"
+                }); 
             }
         }
     } catch (error) {
@@ -30,7 +35,9 @@ exports.gettingBlogs = async(req, res) => {
                 model: db.comment
             }]
         })
-        res.status(200).send(blogs);
+        res.status(200).json({
+            blogs: blogs
+        });
     } catch (error) {
         res.status(500).json({
             msg: error.message
@@ -48,9 +55,11 @@ exports.getBlog = async(req, res) => {
         });
         // If blog is not found show error else show the blog
         if(!getBlog) {
-            return res.status(404).send(`Blog with id ${req.params.id} not found`);
+            return res.status(404).json(`Blog with id ${req.params.id} not found`);
         } else {
-            return res.status(200).send(getBlog);
+            return res.status(200).json({
+                blog: getBlog
+            });
         }
     } catch (error) {
         res.status(404).json({
@@ -67,13 +76,17 @@ exports.updateBlog = async(req, res) => {
         });
         // if blog not found then show error else update the blog
         if(!getBlogToBeUpdated) {
-            return res.status(404).send("This blog does not exist");
+            return res.status(404).json({
+                msg: "This blog does not exist"
+            });
         } else {
             const { title, description } = req.body;
             console.log(title, `=========${description}`);
-            const updatedBlog = await getBlogToBeUpdated.update( { title, description });
+            const updatedBlog = await getBlogToBeUpdated.update({ title, description });
             // console.log(updatedBlog);
-            res.status(200).send("Blog updated successfully");
+            res.status(200).json({
+                msg: "Blog updated successfully"
+            });
         }
     } catch (error) {
         res.status(500).json({
@@ -90,12 +103,16 @@ exports.deleteBlog = async(req, res) => {
         });
         // If blog is not found then show error else delete the blog
         if(!getBlogToBeDeleted) {
-            return res.status(404).send(`Blog with ${req.params.id} does not exist`);
+            return res.status(404).json({
+                msg: `Blog with ${req.params.id} does not exist`
+            });
         } else {
             const removeBlog = await db.blog.destroy({
                 where: { id: req.params.id }
             });
-            return res.send(`Blog with id ${req.params.id} is deleted`);
+            return res.json({
+                msg: `Blog with id ${req.params.id} is deleted`
+        })
         }
     } catch (error) {
         res.status(500).json({

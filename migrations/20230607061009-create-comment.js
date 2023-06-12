@@ -14,10 +14,16 @@ module.exports = {
         allowNull: false,
       },
       userId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'users',
+          key: 'id'
+        }
       },
       blogId: {
         type: Sequelize.INTEGER,
+        allowNull: false,
         references: {
           model: 'blogs',
           key: 'id'
