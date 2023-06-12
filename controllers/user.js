@@ -122,7 +122,12 @@ exports.loginUser = async(req, res) => {
 exports.gettingUsers = async(req, res) => {
     try {
         const users = await db.user.findAll({
-            order: ['createdAt']
+            order: ['createdAt'],
+            include: [{
+                model: db.blog
+            }, {
+                model: db.comment
+            }]
         })
         return res.status(200).json({ users });
     } catch (error) {
@@ -135,7 +140,12 @@ exports.gettingUsers = async(req, res) => {
 exports.getUser = async(req, res) => {
     try {
         const getUser = await db.user.findOne({
-            where: {id: req.params.id}
+            where: {id: req.params.id},
+            include: [{
+                model: db.blog
+            }, {
+                model: db.comment
+            }]
         });
         // If user is not found show error else show the user
         if(!getUser) {
