@@ -14,6 +14,9 @@ module.exports = (sequelize, DataTypes) => {
       Blog.hasMany(models.comment, {
         foreignKey: 'blogId'
       });
+      Blog.hasMany(models.reaction, {
+        foreignKey: 'blogId' 
+      });
       Blog.belongsTo(models.user);
     }
   }
