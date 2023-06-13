@@ -31,6 +31,13 @@ module.exports = {
           key: 'id'
         }
       },
+      reactionId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'reaction_categories',
+          id: 'id'
+        }
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
