@@ -2,7 +2,8 @@ const db = require('../models/index.js');
 
 exports.createBlog = async(req, res) => {
     try {
-        const { title, description} = req.body;
+        const { title, description } = req.body;
+        console.log(req.body);
         if(!title || !description) {
             return res.status(400).json({
                 msg: "Please fill all the fields"
@@ -13,10 +14,13 @@ exports.createBlog = async(req, res) => {
                     msg: "Title exceeds the limit"
                 });
             } else {
-                const newBlog = await db.blog.create({ title, description });
+                const newBlog = await db.blog.create(req.body);
+                console.log(newBlog);
+                // const addBlog = await newBlog.save();
                 // console.log(newBlog);
                 return res.status(200).json({
-                    msg: "Blog created"
+                    msg: "Blog created",
+                    blog: newBlog
                 }); 
             }
         }
@@ -33,9 +37,12 @@ exports.gettingBlogs = async(req, res) => {
             order: ['createdAt'],
             include: [{
                 model: db.comment
+            }, {
+                model: db.blog_category
             }]
         })
         res.status(200).json({
+            msg: "success",
             blogs: blogs
         });
     } catch (error) {
@@ -51,6 +58,8 @@ exports.getBlog = async(req, res) => {
             where: {id: req.params.id},
             include: [{
                 model: db.comment
+            }, {
+                model: db.blog_category
             }]
         });
         // If blog is not found show error else show the blog
@@ -58,6 +67,7 @@ exports.getBlog = async(req, res) => {
             return res.status(404).json(`Blog with id ${req.params.id} not found`);
         } else {
             return res.status(200).json({
+                msg: "success",
                 blog: getBlog
             });
         }
@@ -85,7 +95,8 @@ exports.updateBlog = async(req, res) => {
             const updatedBlog = await getBlogToBeUpdated.update({ title, description });
             // console.log(updatedBlog);
             res.status(200).json({
-                msg: "Blog updated successfully"
+                msg: "Blog updated successfully",
+                blog: updatedBlog
             });
         }
     } catch (error) {
