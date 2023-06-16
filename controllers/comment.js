@@ -8,7 +8,7 @@ exports.createComment = async(req, res) => {
             });
         } else {
             const { content } = req.body;
-            const newComment = await db.comment.create({ content });
+            const newComment = await db.comment.create(req.body);
             return res.status(200).json({
                 msg: "Comment Added"
             });
