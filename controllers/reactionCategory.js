@@ -3,12 +3,14 @@ const db = require('../models/index.js');
 exports.addReactionCategory = async(req, res) => {
     try {
         const { reaction_type } = req.body;
+        console.log(req.body);
+        console.log(reaction_type);
         if(!reaction_type) {
             return res.status(401).json({
                 msg: "Please specify the reaction category"
             })
         } else {
-            const addCategoryType = await db.reaction_category.create({ reaction_type })
+            const addCategoryType = await db.reaction_category.create(req.body)
             return res.status(200).json({
                 msg: "Reaction category added",
                 reactionCategory: reaction_type
@@ -23,7 +25,12 @@ exports.addReactionCategory = async(req, res) => {
 
 exports.getReactionCategories = async(req, res) => {
     try {
-        const reactionCategories = await db.reaction_category.findAll({});
+        const reactionCategories = await db.reaction_category.findAll({
+            // include: [{
+            //     model: db.reaction
+            // }]
+        });
+        console.log(reactionCategories);
         res.status(200).json({
             categories: reactionCategories
         });

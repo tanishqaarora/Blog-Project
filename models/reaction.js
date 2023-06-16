@@ -14,14 +14,12 @@ module.exports = (sequelize, DataTypes) => {
       Reaction.belongsTo(models.user);
       Reaction.belongsTo(models.blog);
       Reaction.belongsTo(models.comment);
-      Reaction.belongsTo(models.reaction_category);
     }
   }
   Reaction.init({
     userId: DataTypes.INTEGER,
     blogId: DataTypes.INTEGER,
     commentId: DataTypes.INTEGER,
-    reactionId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'reaction',
